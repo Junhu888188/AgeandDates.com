@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://ageanddates.com/sitemap.xml
