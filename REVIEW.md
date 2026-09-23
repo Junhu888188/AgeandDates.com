@@ -1,6 +1,6 @@
 # Redesign preview
 
-This branch is a review version. Do not deploy until the owner approves the preview.
+The owner approved the redesign for release after refining the 10,000 Days Old and Age in Weeks icons. Those refinements use matching SVG milestone and calendar-week symbols.
 
 Changes: responsive homepage and shared English tool styling; equal-width year/month/day results; retained birthday countdown panel; SVG logo and favicon assets; calendar calculation corrections and inline validation.
 
