@@ -1,11 +1,11 @@
-"""Build the four approved P0 pages. Content is static HTML; calculators run locally."""
+"""Build the localized tool pages. Content is static HTML; calculators run locally."""
 from pathlib import Path
 import html,json,re
 ROOT=Path(__file__).resolve().parent
 BASE='https://ageanddates.com'
 groups={
  'age':[('en','/','English'),('id','/id/kalkulator-umur/','Bahasa Indonesia'),('de','/de/altersrechner/','Deutsch')],
- 'between':[('en','/days-between-dates.html','English'),('id','/id/kalkulator-selisih-tanggal/','Bahasa Indonesia')],
+ 'between':[('en','/days-between-dates.html','English'),('id','/id/kalkulator-selisih-tanggal/','Bahasa Indonesia'),('pt-BR','/pt-br/calculadora-entre-datas/','Português (Brasil)')],
  'date':[('en','/date-calculator.html','English'),('pt-BR','/pt-br/somar-dias-a-uma-data/','Português (Brasil)')]
 }
 pages=[
@@ -34,6 +34,16 @@ pages=[
  context='Der Rechner hilft bei persönlichen Übersichten und bei der Planung von Geburtstagen. Für gesetzliche Altersgrenzen oder verbindliche Fristen können andere Regeln gelten.',
  faq=[('Wie berechne ich mein genaues Alter?','Trage dein Geburtsdatum und einen Stichtag ein. Das Ergebnis basiert auf Kalendermonaten und verbleibenden Tagen, nicht auf einer pauschalen Division durch 365.'),('Wie alt bin ich an einem bestimmten Datum?','Ändere das Feld „Berechnen bis“. Ein vergangener oder zukünftiger Stichtag ist möglich, solange er nicht vor dem Geburtsdatum liegt.'),('Wie wird der 29. Februar behandelt?','In Nichtschaltjahren setzt dieser Rechner den Geburtstag auf den 28. Februar. Das ist eine Rechenkonvention und keine Aussage über rechtliche Altersgrenzen.'),('Werden meine Eingaben gespeichert?','Die Berechnung erfolgt im Browser. Der Rechner lädt die Datumsangaben nicht hoch, speichert sie nicht im Browserspeicher und ergänzt sie nicht in der URL. Beim Kopieren gelangt das Ergebnis in deine Zwischenablage.'),('Warum sind Kalendermonate und Gesamttage unterschiedlich?','Monate haben 28 bis 31 Tage. Die Kalenderangabe beschreibt volle Monate und Resttage; die Gesamttage zählen dagegen jeden einzelnen Kalendertag.')])
 ]
+
+pages.append(dict(lang='pt-BR',tool='between',url='/pt-br/calculadora-entre-datas/',title='Calculadora entre Datas — Dias entre Duas Datas',h1='Calculadora de Dias entre Duas Datas',description='Calcule quantos dias há entre duas datas, com semanas e diferença em anos, meses e dias. Opção para incluir as duas datas.',lead='Conte os dias corridos entre uma data inicial e uma data final.',start='Data inicial',end='Data final',submit='Calcular diferença',
+ how='Como calcular os dias entre duas datas',steps='Informe as duas datas no formato DD/MM/AAAA e selecione Calcular diferença. Para contar também o dia inicial, marque a opção de incluir as duas datas. O resultado mostra dias, semanas completas e a diferença no calendário.',
+ rules='Dias corridos e contagem inclusiva',rule='A diferença padrão conta os dias decorridos: de 1 a 2 de setembro há 1 dia. Ao incluir as duas datas, são 2 dias. Sábados, domingos e feriados entram na conta. A diferença em anos, meses e dias usa meses completos do calendário e não recebe o dia adicional da contagem inclusiva. Se o dia não existir no mês de destino, usamos o último dia desse mês. As datas são normalizadas em UTC para evitar alterações na contagem por causa do horário de verão.',
+ examples_title='Exemplos de diferença entre datas',examples=['De 1 a 19 de setembro de 2026: 18 dias, ou 2 semanas e 4 dias. Incluindo as duas datas: 19 dias.','De 5 de outubro de 2026 a 5 de outubro de 2026: 0 dias, ou 1 dia incluindo as duas datas.','De 28 de fevereiro de 2024 a 1 de março de 2024: 2 dias, pois 2024 é um ano bissexto.'],
+ context='Use para comparar datas de viagens e atividades pessoais. Para descobrir uma nova data somando ou subtraindo uma quantidade de dias, use a ferramenta relacionada abaixo.',
+ faq=[('A calculadora inclui o dia inicial?','Por padrão, ela calcula os dias decorridos. Marque “Incluir as duas datas” para acrescentar um dia ao total.'),('O que acontece se eu inverter as datas?','O resultado continua positivo. Uma mensagem informa que a data inicial é posterior à data final.'),('São dias úteis ou corridos?','São dias corridos, incluindo fins de semana e feriados. Este resultado não determina prazos legais ou contratuais.'),('O dia 29 de fevereiro entra na conta?','Sim, quando estiver no intervalo de um ano bissexto.'),('Por que um mês não equivale sempre a 30 dias?','Os meses têm de 28 a 31 dias. A diferença no calendário usa meses completos e dias restantes, enquanto o total de dias conta cada dia do intervalo.')]))
+pages[2]['h1']='Somar ou Subtrair Dias de uma Data'
+pages[2]['faq'].append(('Como calcular quantos dias há entre duas datas?','Use a Calculadora de Dias entre Duas Datas, disponível em Ferramentas relacionadas. Aqui você informa uma data e uma quantidade para obter uma nova data.'))
+
 common={
  'id':dict(home='Beranda',tools='Alat lainnya',language='Bahasa',hint='Format: DD/MM/YYYY',copy='Salin hasil',faq='Pertanyaan yang sering diajukan',privacy='Privasi perhitungan',private='Tanggal diproses di perangkat ini. Kode kalkulator tidak mengunggah tanggal, menyimpannya di browser, atau menambahkannya ke URL. Halaman ini tidak memuat analitik. Server hosting tetap dapat menerima data koneksi standar saat halaman dibuka.',short='Tanggal dihitung di perangkat ini, tanpa akun.',legal='Kebijakan privasi (bahasa Inggris)',terms='Ketentuan (bahasa Inggris)',contact='Kontak (bahasa Inggris)',note='Untuk informasi umum, bukan penetapan hukum.',related='Alat terkait'),
  'de':dict(home='Startseite',tools='Weitere Rechner',language='Sprache',hint='Format: TT.MM.JJJJ',copy='Ergebnis kopieren',faq='Häufige Fragen',privacy='Datenschutz bei der Berechnung',private='Die Berechnung findet auf deinem Gerät statt. Der Rechner lädt deine Datumsangaben nicht hoch, speichert sie nicht im Browserspeicher und schreibt sie nicht in die URL. Diese Seite lädt keine Analysesoftware. Beim Seitenaufruf kann der Hosting-Server übliche Verbindungsdaten erhalten.',short='Berechnung auf deinem Gerät, ohne Konto.',legal='Datenschutzerklärung (Englisch)',terms='Nutzungsbedingungen (Englisch)',contact='Kontakt (Englisch)',note='Allgemeine Information, keine rechtliche Altersfeststellung.',related='Weitere Rechner'),
@@ -47,15 +57,27 @@ def language_links(tool,lang,label):
 def field(name,label,lang,today=False):
  hint=common[lang]['hint'];placeholder='TT.MM.JJJJ' if lang=='de' else ('DD/MM/AAAA' if lang=='pt-BR' else 'DD/MM/YYYY')
  return f'<label for="{name}">{label}<input id="{name}" name="{name}" type="text" inputmode="numeric" maxlength="10" placeholder="{placeholder}" aria-describedby="{name}-hint" autocomplete="off" required'+(' data-today' if today else '')+f'><span class="form-hint" id="{name}-hint">{hint}</span></label>'
+
+def year_tool(lang):
+ if lang=='id':
+  title='Lahir tahun berapa, umur berapa?';intro='Jika hanya tahu tahun lahir, hitung rentang usia pada tahun pilihan. Usia tepat bergantung pada apakah ulang tahun sudah lewat.'
+  born='Tahun lahir';target='Tahun perhitungan';submit='Hitung dari tahun lahir'
+  example='Contoh: kelahiran 1997 berusia 28 atau 29 tahun pada 2026. Sebelum ulang tahun: 28; pada dan setelah ulang tahun: 29. Untuk usia tepat, gunakan tanggal lahir pada kalkulator di atas.'
+ else:
+  title='Wie alt bin ich mit meinem Geburtsjahr?';intro='Wenn du nur das Geburtsjahr kennst, berechne die mögliche Altersspanne im gewünschten Jahr. Das genaue Alter hängt davon ab, ob dein Geburtstag schon war.'
+  born='Geburtsjahr';target='Bezugsjahr';submit='Alter aus Geburtsjahr berechnen'
+  example='Beispiel: Wer 1991 geboren ist, wird 2026 35 Jahre alt. Vor dem Geburtstag sind es 34 Jahre, ab dem Geburtstag 35. Für das genaue Alter nutze oben dein vollständiges Geburtsdatum.'
+ return f'''<section class="section prose" aria-labelledby="year-heading"><h2 id="year-heading">{title}</h2><p>{intro}</p><form id="year-form" class="card calculator toolbox" novalidate><div class="formgrid"><label for="birth-year">{born}<input id="birth-year" name="birth-year" type="number" min="1" max="9999" step="1" placeholder="1997" required></label><label for="target-year">{target}<input id="target-year" name="target-year" type="number" min="1" max="9999" step="1" required data-current-year></label></div><button type="submit" style="margin-top:18px">{submit}</button><p id="year-error" class="form-error" role="alert" tabindex="-1" hidden></p><p id="year-result" role="status" hidden></p></form><p>{example}</p></section>'''
+
 for p in pages:
  lang=p['lang'];c=common[lang];tool=p['tool'];url=BASE+p['url'];home=next(x['url']for x in pages if x['lang']==lang)
  fields=field('start',p['start'],lang,tool=='date')
  if tool!='date':fields+=field('end',p['end'],lang,True)
  else:fields+='<label for="direction">Operação<select id="direction" name="direction"><option value="add">Somar</option><option value="subtract">Subtrair</option></select></label><label for="amount">Quantidade<input id="amount" name="amount" type="number" value="1" min="0" step="1" required></label><label for="unit">Unidade<select id="unit" name="unit"><option value="days">Dias</option><option value="weeks">Semanas</option><option value="months">Meses</option><option value="years">Anos</option></select></label>'
- checkbox='<label class="check-row"><input name="inclusive" type="checkbox">Hitung kedua tanggal (awal dan akhir)</label>' if tool=='between' else ''
+ checkbox=('<label class="check-row"><input name="inclusive" type="checkbox">'+('Incluir as duas datas (inicial e final)' if lang=='pt-BR' else 'Hitung kedua tanggal (awal dan akhir)')+'</label>') if tool=='between' else ''
  related=[(x['url'],x['h1'])for x in pages if x['lang']==lang and x['url']!=p['url']]
  if lang=='de':related=[('/days-between-dates.html','Tage zwischen zwei Daten (Englisch)'),('/date-calculator.html','Datum addieren oder abziehen (Englisch)')]
- if lang=='pt-BR':related=[('/days-between-dates.html','Dias entre duas datas (inglês)'),('/birthday-countdown.html','Contagem até o aniversário (inglês)')]
+ if lang=='pt-BR':related.append(('/birthday-countdown.html','Contagem até o aniversário (inglês)'))
  schema={'@context':'https://schema.org','@graph':[{'@type':'WebApplication','name':p['h1'],'url':url,'inLanguage':lang,'description':p['description'],'applicationCategory':'UtilitiesApplication','operatingSystem':'Any','browserRequirements':'Requires JavaScript','isAccessibleForFree':True},{'@type':'BreadcrumbList','itemListElement':[{'@type':'ListItem','position':1,'name':'Age & Dates','item':BASE+'/'},{'@type':'ListItem','position':2,'name':p['h1'],'item':url}]}]}
  output=f'''<!doctype html>
 <html lang="{lang}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -67,25 +89,26 @@ for p in pages:
 <main><div class="wrap">{language_links(tool,lang,c['language'])}<section class="toolhero"><h1>{p['h1']}</h1><p>{p['lead']}</p></section>
 <form id="localized-form" class="card calculator toolbox" novalidate><div class="formgrid">{fields}</div>{checkbox}<button type="submit" style="margin-top:18px">{p['submit']}</button><p class="privacy-line">{c['short']}</p><p id="localized-error" class="form-error" role="alert" tabindex="-1" hidden></p></form>
 <div class="calculator" style="padding:0;margin-top:20px"><div id="localized-result" class="card result" aria-live="polite" hidden></div></div><div class="copy-area"><button id="copy-result" type="button" hidden>{c['copy']}</button><p id="copy-status" class="note" role="status"></p></div>
+{year_tool(lang) if tool=='age' else ''}
 <section class="section prose"><h2>{p['how']}</h2><p>{p['steps']}</p><h2>{p['examples_title']}</h2><ul class="example-list">{''.join('<li>'+esc(x)+'</li>'for x in p['examples'])}</ul><h2>{p['rules']}</h2><p>{p['rule']}</p><p>{p['context']}</p><div class="faq"><h2>{c['faq']}</h2>{''.join('<details><summary>'+esc(q)+'</summary><p>'+esc(a)+'</p></details>'for q,a in p['faq'])}</div><section class="local-privacy"><h2>{c['privacy']}</h2><p>{c['private']}</p><a href="/privacy.html">{c['legal']}</a></section></section>
 <section class="section" id="related"><h2>{c['related']}</h2><div class="related-links">{''.join('<a href="'+u+'">'+esc(t)+'</a>'for u,t in related)}</div></section></div></main>
 <footer class="footer"><div class="wrap"><div class="footerlinks"><a href="{home}">{c['home']}</a><a href="/privacy.html">{c['legal']}</a><a href="/terms.html">{c['terms']}</a><a href="/contact.html">{c['contact']}</a></div>© 2026 Age &amp; Dates. {c['note']}</div></footer></body></html>
 '''
- dest=ROOT/p['url'].strip('/')/'index.html';dest.parent.mkdir(parents=True,exist_ok=True);dest.write_text(output)
+ dest=ROOT/p['url'].strip('/')/'index.html';dest.parent.mkdir(parents=True,exist_ok=True);dest.write_text(output,encoding="utf-8")
 # Reciprocal tags and visible language links on each English equivalent.
 for tool,g in groups.items():
- dest=ROOT/('index.html' if g[0][1]=='/' else g[0][1].lstrip('/'));s=dest.read_text()
+ dest=ROOT/('index.html' if g[0][1]=='/' else g[0][1].lstrip('/'));s=dest.read_text(encoding="utf-8")
  s=re.sub(r'\n?<!-- P0 languages -->.*?<!-- /P0 languages -->','',s,flags=re.S)
  s=s.replace('</head>','<!-- P0 languages -->'+alternates(tool)+'<!-- /P0 languages --></head>')
  s=s.replace('</main>','<!-- P0 languages --><div class="wrap">'+language_links(tool,'en','Language')+'</div><!-- /P0 languages --></main>')
  if 'href="localized.css"' not in s:s=s.replace('</head>','<link rel="stylesheet" href="localized.css"></head>')
- dest.write_text(s)
+ dest.write_text(s,encoding="utf-8")
 # A homepage entry for all four P0 pages, without implying equivalent intents.
-dest=ROOT/'index.html';s=dest.read_text();s=re.sub(r'<!-- P0 directory -->.*?<!-- /P0 directory -->','',s,flags=re.S)
+dest=ROOT/'index.html';s=dest.read_text(encoding="utf-8");s=re.sub(r'<!-- P0 directory -->.*?<!-- /P0 directory -->','',s,flags=re.S)
 directory='<section class="section wrap"><h2>Tools in your language</h2><div class="related-links">'+''.join(f'<a href="{p["url"]}" lang="{p["lang"]}">{p["h1"]}</a>'for p in pages)+'</div></section>'
-s=s.replace('</main>','<!-- P0 directory -->'+directory+'<!-- /P0 directory --></main>');dest.write_text(s)
-dest=ROOT/'sitemap.xml';s=dest.read_text()
+s=s.replace('</main>','<!-- P0 directory -->'+directory+'<!-- /P0 directory --></main>');dest.write_text(s,encoding="utf-8")
+dest=ROOT/'sitemap.xml';s=dest.read_text(encoding="utf-8")
 for p in pages:
  if BASE+p['url'] not in s:s=s.replace('</urlset>',f'<url><loc>{BASE+p["url"]}</loc></url>\n</urlset>')
-dest.write_text(s)
-print('Built 4 P0 pages; updated 3 English equivalents and sitemap.')
+dest.write_text(s,encoding="utf-8")
+print('Built 5 localized pages; updated English equivalents and sitemap.')

@@ -26,3 +26,23 @@ for(const [start,amount,unit,direction,expected]of [
 for(const amount of ['-1','1.5','', '999999999999999999999999'])assert.ok(L.calculate('date','pt-BR',{start:'01/01/2026',amount,unit:'days'}).error);
 assert.ok(L.calculate('date','pt-BR',{start:'31/12/9999',amount:'1',unit:'days'}).error);
 console.log('Localized dates, age, inclusive/reversed ranges, month ends and range errors passed.');
+assert.deepEqual(L.yearAge('1997','2026'),{min:28,max:29});
+assert.deepEqual(L.yearAge('1991','2026'),{min:34,max:35});
+assert.deepEqual(L.yearAge('2026','2026'),{min:0,max:0});
+assert.deepEqual(L.yearAge('1','9999'),{min:9997,max:9998});
+for(const [birth,target] of [['2027','2026'],['0','2026'],['1997','10000'],['1997.5','2026'],['','2026'],['1e3','2026']])assert.equal(L.yearAge(birth,target),null);
+for(const [start,end,inclusive,expected] of [
+ ['01/09/2026','19/09/2026',false,'18 dias'],
+ ['19/09/2026','01/09/2026',false,'18 dias'],
+ ['05/10/2026','05/10/2026',true,'1 dia'],
+ ['05/10/2026','05/10/2026',false,'0 dias'],
+ ['28/02/2024','01/03/2024',false,'2 dias']
+]){
+ const result=L.calculate('between','pt-BR',{start,end,inclusive});
+ assert.ok(result.html.includes(expected));
+ assert.ok(!result.html.includes('undefined'));
+ assert.ok(!result.html.includes('NaN'));
+}
+assert.match(L.calculate('between','pt-BR',{start:'19/09/2026',end:'01/09/2026'}).html,/As datas foram invertidas/);
+assert.ok(L.calculate('between','pt-BR',{start:'29/02/2025',end:'01/03/2025'}).error);
+console.log('Birth-year ranges and Portuguese date differences passed.');
