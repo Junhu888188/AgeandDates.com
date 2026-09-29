@@ -3,14 +3,14 @@ const C=typeof module==='object'?require('./calendar.js'):window.ADCalendar;
 const words={
  id:{locale:'id-ID',units:[['tahun','tahun'],['bulan','bulan'],['hari','hari']],days:'hari',weeks:'minggu penuh',months:'bulan penuh',total:'Total hari',born:'Hari lahir',next:'Ulang tahun berikutnya',left:'hari lagi',turn:'Usia pada ulang tahun berikutnya',happy:'Selamat ulang tahun!',result:'Hasil perhitungan',bad:'Masukkan tanggal yang valid dengan format DD/MM/YYYY.',order:'Tanggal perhitungan tidak boleh sebelum tanggal lahir.',range:'Hasil harus berada antara tahun 0001 dan 9999.',copy:'Salin hasil',copied:'Hasil disalin.',failed:'Tidak dapat menyalin otomatis. Pilih teks hasil lalu salin.',inclusive:'Kedua tanggal dihitung. Tanggal yang sama dihitung sebagai 1 hari.',exclusive:'Selisih hari berlalu; tanggal yang sama menghasilkan 0 hari.',calendar:'Selisih kalender tanpa tambahan hari inklusif',reverse:'Urutan tanggal dibalik; selisih ditampilkan sebagai nilai positif.',remainder:'sisa hari',asof:'Dihitung sampai'},
  de:{locale:'de-DE',units:[['Jahr','Jahre'],['Monat','Monate'],['Tag','Tage']],days:'Tage',weeks:'volle Wochen',months:'volle Monate',total:'Gesamte Tage',born:'Geboren am',next:'Dein nächster Geburtstag',left:'Tage verbleiben',turn:'Alter am nächsten Geburtstag',happy:'Alles Gute zum Geburtstag!',result:'Dein Ergebnis',bad:'Bitte gib ein gültiges Datum im Format TT.MM.JJJJ ein.',order:'Der Stichtag darf nicht vor dem Geburtsdatum liegen.',range:'Das Ergebnis muss zwischen den Jahren 0001 und 9999 liegen.',copy:'Ergebnis kopieren',copied:'Ergebnis kopiert.',failed:'Automatisches Kopieren ist nicht möglich. Markiere und kopiere den Ergebnistext.',asof:'Berechnet bis'},
- 'pt-BR':{locale:'pt-BR',result:'Data resultante',bad:'Digite uma data válida no formato DD/MM/AAAA.',range:'O resultado deve estar entre os anos 0001 e 9999.',amount:'Digite uma quantidade inteira maior ou igual a zero.',copy:'Copiar resultado',copied:'Resultado copiado.',failed:'Não foi possível copiar automaticamente. Selecione e copie o texto do resultado.',add:'Somar',subtract:'Subtrair',units:{days:['dia','dias'],weeks:['semana','semanas'],months:['mês','meses'],years:['ano','anos']}}
+ 'pt-BR':{locale:'pt-BR',calendarUnits:[['ano','anos'],['mês','meses'],['dia','dias']],days:'dias',weeks:'semanas completas',remainder:'dias restantes',inclusive:'As duas datas estão incluídas. Datas iguais contam como 1 dia.',exclusive:'Dias decorridos; datas iguais resultam em 0 dias.',calendar:'Diferença no calendário sem o dia adicional inclusivo',reverse:'As datas foram invertidas; a diferença é apresentada como um valor positivo.',betweenResult:'Diferença entre as datas',result:'Data resultante',bad:'Digite uma data válida no formato DD/MM/AAAA.',range:'O resultado deve estar entre os anos 0001 e 9999.',amount:'Digite uma quantidade inteira maior ou igual a zero.',copy:'Copiar resultado',copied:'Resultado copiado.',failed:'Não foi possível copiar automaticamente. Selecione e copie o texto do resultado.',add:'Somar',subtract:'Subtrair',units:{days:['dia','dias'],weeks:['semana','semanas'],months:['mês','meses'],years:['ano','anos']}}
 };
 function parseLocal(value,lang){const sep=lang==='de'?'.':'/';const parts=(value||'').trim().split(sep);if(parts.length!==3||!/^\d{1,2}$/.test(parts[0])||!/^\d{1,2}$/.test(parts[1])||!/^\d{4}$/.test(parts[2]))return null;return C.parse(`${parts[2]}-${parts[1].padStart(2,'0')}-${parts[0].padStart(2,'0')}`);}
 function inputDate(d,lang){const [y,m,day]=C.iso(d).split('-');return [day,m,y].join(lang==='de'?'.':'/');}
 function calculate(tool,lang,v){
  const w=words[lang],n=x=>x.toLocaleString(w.locale),fmt=d=>d.toLocaleDateString(w.locale,{day:'numeric',month:'long',year:'numeric',timeZone:'UTC'}),weekday=d=>d.toLocaleDateString(w.locale,{weekday:'long',timeZone:'UTC'});
  const fail=message=>({error:message});
- const cols=a=>`<div class="age-columns">${[a.y,a.m,a.d].map((x,i)=>`<div><b>${n(x)}</b><span>${w.units[i][x===1?0:1]}</span></div>`).join('')}</div>`;
+ const cols=a=>`<div class="age-columns">${[a.y,a.m,a.d].map((x,i)=>`<div><b>${n(x)}</b><span>${(w.calendarUnits||w.units)[i][x===1?0:1]}</span></div>`).join('')}</div>`;
  const a=parseLocal(v.start,lang),b=parseLocal(v.end,lang);
  if(!a||(tool!=='date'&&!b))return fail(w.bad);
  let html='';
@@ -21,7 +21,8 @@ function calculate(tool,lang,v){
   html=`<div class="age-summary"><div class="result-heading">${w.result}</div>${cols(age)}<div class="age-facts"><span><b>${n(days)}</b> ${w.days}</span><span>${w.born}: <b>${weekday(a)}</b></span></div><div class="stats"><div class="stat"><b>${n(Math.floor(days/7))}</b><span>${w.weeks}</span></div><div class="stat"><b>${n(age.y*12+age.m)}</b><span>${w.months}</span></div></div><p class="note">${w.asof}: ${fmt(b)}</p></div><div class="birthday-panel"><div class="birthday-ring" style="--progress:${progress}%"><div><b>${left}</b><span>${w.left}</span></div></div><div class="birthday-copy"><h3>${w.next}</h3><p>${weekday(next)}, ${fmt(next)}</p><p>${left===0?w.happy:w.turn+': '+(next.getUTCFullYear()-a.getUTCFullYear())}</p></div></div>`;
  }else if(tool==='between'){
   const x=a<b?a:b,y=a<b?b:a,days=C.days(x,y)+(v.inclusive?1:0);
-  html=`<div class="age-summary"><div class="result-heading">${w.result}</div><div class="big">${n(days)} ${w.days}</div><p>${n(Math.floor(days/7))} ${w.weeks}; ${days%7} ${w.remainder}.</p><p class="note">${v.inclusive?w.inclusive:w.exclusive}</p>${a>b?`<p class="note">${w.reverse}</p>`:''}<h3>${w.calendar}</h3>${cols(C.age(x,y))}<p>${fmt(a)} → ${fmt(b)}</p></div>`;
+  const dayLabel=lang==='pt-BR'&&days===1?'dia':w.days,weekLabel=lang==='pt-BR'&&Math.floor(days/7)===1?'semana completa':w.weeks,remainderLabel=lang==='pt-BR'&&days%7===1?'dia restante':w.remainder;
+  html=`<div class="age-summary"><div class="result-heading">${w.betweenResult||w.result}</div><div class="big">${n(days)} ${dayLabel}</div><p>${n(Math.floor(days/7))} ${weekLabel}; ${days%7} ${remainderLabel}.</p><p class="note">${v.inclusive?w.inclusive:w.exclusive}</p>${a>b?`<p class="note">${w.reverse}</p>`:''}<h3>${w.calendar}</h3>${cols(C.age(x,y))}<p>${fmt(a)} → ${fmt(b)}</p></div>`;
  }else if(tool==='date'){
   const amount=Number(v.amount),unit=v.unit,sign=v.direction==='subtract'?-1:1;
   if(!/^\d+$/.test(v.amount||'')||!Number.isSafeInteger(amount)||!w.units[unit])return fail(w.amount);
@@ -31,10 +32,32 @@ function calculate(tool,lang,v){
  }
  return {html};
 }
-if(typeof module==='object'){module.exports={calculate,parseLocal,inputDate};return;}
+
+function yearAge(birth,target){
+ if(!/^\d{1,4}$/.test(birth)||!/^\d{1,4}$/.test(target))return null;
+ const b=Number(birth),t=Number(target);
+ if(b<1||t<1||b>9999||t>9999||t<b)return null;
+ return {min:Math.max(0,t-b-1),max:t-b};
+}
+if(typeof module==='object'){module.exports={calculate,parseLocal,inputDate,yearAge};return;}
 document.addEventListener('DOMContentLoaded',()=>{
  const lang=document.documentElement.lang,tool=document.body.dataset.localized,w=words[lang],form=document.getElementById('localized-form'),result=document.getElementById('localized-result'),error=document.getElementById('localized-error'),copy=document.getElementById('copy-result'),status=document.getElementById('copy-status');
  if(!form)return;
+
+ const yearForm=document.getElementById('year-form');
+ if(yearForm){
+  document.getElementById('target-year').value=String(C.today().getUTCFullYear());
+  yearForm.addEventListener('submit',e=>{
+   e.preventDefault();
+   const r=yearAge(document.getElementById('birth-year').value,document.getElementById('target-year').value);
+   const out=document.getElementById('year-result'),err=document.getElementById('year-error');
+   out.hidden=!r;err.hidden=!!r;out.textContent='';
+   err.textContent=r?'':lang==='id'?'Masukkan tahun 1–9999. Tahun perhitungan tidak boleh sebelum tahun lahir.':'Bitte gib Jahre von 1 bis 9999 ein. Das Bezugsjahr darf nicht vor dem Geburtsjahr liegen.';
+   if(!r){err.focus();return;}
+   out.textContent=lang==='id'?(r.max===0?'Usia 0 tahun sejak lahir pada tahun tersebut.':`Sebelum ulang tahun: ${r.min} tahun. Pada dan setelah ulang tahun: ${r.max} tahun.`):(r.max===0?'Ab der Geburt in diesem Jahr: 0 Jahre.':`Vor dem Geburtstag: ${r.min} Jahre. Ab dem Geburtstag: ${r.max} Jahre.`);
+  });
+ }
+
  document.querySelectorAll('[data-today]').forEach(el=>el.value=inputDate(C.today(),lang));
  form.addEventListener('submit',e=>{e.preventDefault();const v={};new FormData(form).forEach((value,key)=>v[key]=value);v.inclusive=!!form.querySelector('[name=inclusive]:checked');const r=calculate(tool,lang,v);status.textContent='';error.hidden=!r.error;error.textContent=r.error||'';result.hidden=!!r.error;copy.hidden=!!r.error;if(r.error){error.focus();return;}result.innerHTML=r.html;});
  copy.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(result.innerText);status.textContent=w.copied;}catch{status.textContent=w.failed;}});

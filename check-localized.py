@@ -18,14 +18,14 @@ def resolve(url):
  p=urlparse(url).path
  return root/(p.lstrip('/')+('index.html'if p.endswith('/')else ''))
 localized=list(root.glob('id/*/index.html'))+list(root.glob('de/*/index.html'))+list(root.glob('pt-br/*/index.html'))
-assert len(localized)==4
+assert len(localized)==5
 sitemap=ET.parse(root/'sitemap.xml');urls={e.text for e in sitemap.iter('{http://www.sitemaps.org/schemas/sitemap/0.9}loc')}
 for f in localized:
- s=f.read_text();p=Page(s);expected='https://ageanddates.com/'+str(f.parent.relative_to(root))+'/'
+ s=f.read_text(encoding="utf-8");p=Page(s);expected='https://ageanddates.com/'+f.parent.relative_to(root).as_posix()+'/'
  assert p.h1==1 and len(p.ids)==len(set(p.ids)),f
  assert p.canonical==expected and expected in urls,f
  assert p.alt[p.lang]==expected and 'x-default'in p.alt,f
- for lang,url in p.alt.items():assert Page(resolve(url).read_text()).alt==p.alt,(f,url)
+ for lang,url in p.alt.items():assert Page(resolve(url).read_text(encoding="utf-8")).alt==p.alt,(f,url)
  for url in p.links:
   if url.startswith('#') or url.startswith(('mailto:','https:','http:')):continue
   target=resolve(url) if url.startswith('/')else f.parent/url
@@ -34,4 +34,4 @@ for f in localized:
  assert 'googletagmanager' not in s and 'localStorage' not in s,f
  import re
  for schema in re.findall(r'<script type="application/ld\+json">(.*?)</script>',s):json.loads(schema)
-print('4 static pages: self-canonicals, reciprocal hreflang, sitemap, local links and JSON-LD passed.')
+print('5 static pages: self-canonicals, reciprocal hreflang, sitemap, local links and JSON-LD passed.')
