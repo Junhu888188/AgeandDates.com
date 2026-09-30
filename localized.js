@@ -59,6 +59,15 @@ document.addEventListener('DOMContentLoaded',()=>{
  }
 
  document.querySelectorAll('[data-today]').forEach(el=>el.value=inputDate(C.today(),lang));
+ document.querySelectorAll('[data-example]').forEach(button=>button.addEventListener('click',()=>{
+  const values=JSON.parse(button.dataset.example);
+  Object.entries(values).forEach(([name,value])=>{form.elements.namedItem(name).value=value;});
+  const inclusive=form.querySelector('[name=inclusive]');if(inclusive)inclusive.checked=false;
+  form.requestSubmit();
+  result.tabIndex=-1;
+  result.focus({preventScroll:true});
+  result.scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth',block:'center'});
+ }));
  form.addEventListener('submit',e=>{e.preventDefault();const v={};new FormData(form).forEach((value,key)=>v[key]=value);v.inclusive=!!form.querySelector('[name=inclusive]:checked');const r=calculate(tool,lang,v);status.textContent='';error.hidden=!r.error;error.textContent=r.error||'';result.hidden=!!r.error;copy.hidden=!!r.error;if(r.error){error.focus();return;}result.innerHTML=r.html;});
  copy.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(result.innerText);status.textContent=w.copied;}catch{status.textContent=w.failed;}});
 });
