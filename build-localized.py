@@ -1,6 +1,7 @@
 """Build the localized tool pages. Content is static HTML; calculators run locally."""
 from pathlib import Path
 import html,json,re
+from localized_design import COPY, introduction, trust, content, related_cards, icon
 ROOT=Path(__file__).resolve().parent
 BASE='https://ageanddates.com'
 groups={
@@ -67,7 +68,7 @@ def year_tool(lang):
   title='Wie alt bin ich mit meinem Geburtsjahr?';intro='Wenn du nur das Geburtsjahr kennst, berechne die mögliche Altersspanne im gewünschten Jahr. Das genaue Alter hängt davon ab, ob dein Geburtstag schon war.'
   born='Geburtsjahr';target='Bezugsjahr';submit='Alter aus Geburtsjahr berechnen'
   example='Beispiel: Wer 1991 geboren ist, wird 2026 35 Jahre alt. Vor dem Geburtstag sind es 34 Jahre, ab dem Geburtstag 35. Für das genaue Alter nutze oben dein vollständiges Geburtsdatum.'
- return f'''<section class="section prose" aria-labelledby="year-heading"><h2 id="year-heading">{title}</h2><p>{intro}</p><form id="year-form" class="card calculator toolbox" novalidate><div class="formgrid"><label for="birth-year">{born}<input id="birth-year" name="birth-year" type="number" min="1" max="9999" step="1" placeholder="1997" required></label><label for="target-year">{target}<input id="target-year" name="target-year" type="number" min="1" max="9999" step="1" required data-current-year></label></div><button type="submit" style="margin-top:18px">{submit}</button><p id="year-error" class="form-error" role="alert" tabindex="-1" hidden></p><p id="year-result" role="status" hidden></p></form><p>{example}</p></section>'''
+ return f'''<section class="year-section" aria-labelledby="year-heading"><div class="year-intro"><p class="local-eyebrow">{COPY[lang]["year"]}</p><h2 id="year-heading">{title}</h2><p>{intro}</p><p class="year-example">{example}</p></div><form id="year-form" class="card calculator toolbox" novalidate><div class="formgrid"><label for="birth-year">{born}<input id="birth-year" name="birth-year" type="number" min="1" max="9999" step="1" placeholder="1997" required></label><label for="target-year">{target}<input id="target-year" name="target-year" type="number" min="1" max="9999" step="1" required data-current-year></label></div><button type="submit" style="margin-top:18px">{submit}</button><p id="year-error" class="form-error" role="alert" tabindex="-1" hidden></p><p id="year-result" role="status" hidden></p></form></section>'''
 
 for p in pages:
  lang=p['lang'];c=common[lang];tool=p['tool'];url=BASE+p['url'];home=next(x['url']for x in pages if x['lang']==lang)
@@ -83,15 +84,16 @@ for p in pages:
 <html lang="{lang}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>{esc(p['title'])}</title><meta name="description" content="{esc(p['description'])}"><link rel="canonical" href="{url}"><meta name="robots" content="index,follow">
 {alternates(tool)}
-<link rel="stylesheet" href="/styles.css"><link rel="stylesheet" href="/redesign.css"><link rel="stylesheet" href="/localized.css"><link rel="icon" href="/assets/favicon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
-<script type="application/ld+json">{json.dumps(schema,ensure_ascii=False)}</script><script src="/calendar.js" defer></script><script src="/localized.js" defer></script></head>
+<link rel="stylesheet" href="/styles.css"><link rel="stylesheet" href="/redesign.css"><link rel="stylesheet" href="/localized.css?v=20260930"><link rel="icon" href="/assets/favicon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+<script type="application/ld+json">{json.dumps(schema,ensure_ascii=False)}</script><script src="/calendar.js" defer></script><script src="/localized.js?v=20260930" defer></script></head>
 <body class="localized-page" data-localized="{tool}"><header class="site-header"><div class="wrap nav"><a class="brand" href="{home}"><img src="/assets/logo.svg" alt="" width="39" height="39">Age &amp; Dates<span class="brand-dot">.</span></a><nav class="navlinks" aria-label="{c['tools']}"><a href="#related">{c['tools']}</a></nav></div></header>
-<main><div class="wrap">{language_links(tool,lang,c['language'])}<section class="toolhero"><h1>{p['h1']}</h1><p>{p['lead']}</p></section>
-<form id="localized-form" class="card calculator toolbox" novalidate><div class="formgrid">{fields}</div>{checkbox}<button type="submit" style="margin-top:18px">{p['submit']}</button><p class="privacy-line">{c['short']}</p><p id="localized-error" class="form-error" role="alert" tabindex="-1" hidden></p></form>
-<div class="calculator" style="padding:0;margin-top:20px"><div id="localized-result" class="card result" aria-live="polite" hidden></div></div><div class="copy-area"><button id="copy-result" type="button" hidden>{c['copy']}</button><p id="copy-status" class="note" role="status"></p></div>
+<main><div class="wrap">{language_links(tool,lang,c['language'])}<section class="local-hero">{introduction(p)}
+<form id="localized-form" class="card calculator toolbox" novalidate><h2 class="calculator-title"><span class="form-icon">{icon(tool)}</span>{COPY[lang]["form"]}</h2><div class="formgrid">{fields}</div>{checkbox}<button type="submit" style="margin-top:18px">{p['submit']} <span aria-hidden="true">→</span></button><p class="privacy-line">{c['short']}</p><p id="localized-error" class="form-error" role="alert" tabindex="-1" hidden></p></form>
+</section>{trust(lang)}
+<div class="local-result-wrap"><div id="localized-result" class="card result" aria-live="polite" hidden></div></div><div class="copy-area"><button id="copy-result" type="button" hidden>{c['copy']}</button><p id="copy-status" class="note" role="status"></p></div>
 {year_tool(lang) if tool=='age' else ''}
-<section class="section prose"><h2>{p['how']}</h2><p>{p['steps']}</p><h2>{p['examples_title']}</h2><ul class="example-list">{''.join('<li>'+esc(x)+'</li>'for x in p['examples'])}</ul><h2>{p['rules']}</h2><p>{p['rule']}</p><p>{p['context']}</p><div class="faq"><h2>{c['faq']}</h2>{''.join('<details><summary>'+esc(q)+'</summary><p>'+esc(a)+'</p></details>'for q,a in p['faq'])}</div><section class="local-privacy"><h2>{c['privacy']}</h2><p>{c['private']}</p><a href="/privacy.html">{c['legal']}</a></section></section>
-<section class="section" id="related"><h2>{c['related']}</h2><div class="related-links">{''.join('<a href="'+u+'">'+esc(t)+'</a>'for u,t in related)}</div></section></div></main>
+{content(p,c)}
+{related_cards(p,related,pages)}</div></main>
 <footer class="footer"><div class="wrap"><div class="footerlinks"><a href="{home}">{c['home']}</a><a href="/privacy.html">{c['legal']}</a><a href="/terms.html">{c['terms']}</a><a href="/contact.html">{c['contact']}</a></div>© 2026 Age &amp; Dates. {c['note']}</div></footer></body></html>
 '''
  dest=ROOT/p['url'].strip('/')/'index.html';dest.parent.mkdir(parents=True,exist_ok=True);dest.write_text(output,encoding="utf-8")
