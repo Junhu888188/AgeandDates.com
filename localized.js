@@ -43,9 +43,26 @@ if(typeof module==='object'){module.exports={calculate,parseLocal,inputDate,year
 document.addEventListener('DOMContentLoaded',()=>{
  const lang=document.documentElement.lang,tool=document.body.dataset.localized,w=words[lang],form=document.getElementById('localized-form'),result=document.getElementById('localized-result'),error=document.getElementById('localized-error'),copy=document.getElementById('copy-result'),status=document.getElementById('copy-status');
  if(!form)return;
+ const changed={id:'Input berubah. Hitung kembali untuk melihat hasil terbaru.',de:'Eingaben geändert. Bitte erneut berechnen, um das aktuelle Ergebnis zu sehen.','pt-BR':'Os dados foram alterados. Calcule novamente para ver o resultado atualizado.'}[lang];
+ let revision=0;
+ const clearResult=()=>{
+  revision++;
+  if(!result.hidden)status.textContent=changed;
+  result.hidden=true;result.innerHTML='';copy.hidden=true;
+  error.hidden=true;error.textContent='';
+ };
+ form.addEventListener('input',clearResult);
+ form.addEventListener('change',clearResult);
 
  const yearForm=document.getElementById('year-form');
  if(yearForm){
+  const clearYear=()=>{
+   const out=document.getElementById('year-result'),err=document.getElementById('year-error');
+   if(!out.hidden)out.textContent=changed;
+   err.hidden=true;err.textContent='';
+  };
+  yearForm.addEventListener('input',clearYear);
+  yearForm.addEventListener('change',clearYear);
   document.getElementById('target-year').value=String(C.today().getUTCFullYear());
   yearForm.addEventListener('submit',e=>{
    e.preventDefault();
@@ -68,7 +85,12 @@ document.addEventListener('DOMContentLoaded',()=>{
   result.focus({preventScroll:true});
   result.scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth',block:'center'});
  }));
- form.addEventListener('submit',e=>{e.preventDefault();const v={};new FormData(form).forEach((value,key)=>v[key]=value);v.inclusive=!!form.querySelector('[name=inclusive]:checked');const r=calculate(tool,lang,v);status.textContent='';error.hidden=!r.error;error.textContent=r.error||'';result.hidden=!!r.error;copy.hidden=!!r.error;if(r.error){error.focus();return;}result.innerHTML=r.html;});
- copy.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(result.innerText);status.textContent=w.copied;}catch{status.textContent=w.failed;}});
+ form.addEventListener('submit',e=>{e.preventDefault();revision++;const v={};new FormData(form).forEach((value,key)=>v[key]=value);v.inclusive=!!form.querySelector('[name=inclusive]:checked');const r=calculate(tool,lang,v);status.textContent='';error.hidden=!r.error;error.textContent=r.error||'';result.hidden=!!r.error;copy.hidden=!!r.error;if(r.error){error.focus();return;}result.innerHTML=r.html;});
+ copy.addEventListener('click',async()=>{
+  if(result.hidden)return;
+  const copiedRevision=revision;
+  try{await navigator.clipboard.writeText(result.innerText);if(copiedRevision===revision)status.textContent=w.copied;}
+  catch{if(copiedRevision===revision)status.textContent=w.failed;}
+ });
 });
 })();
