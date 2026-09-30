@@ -85,7 +85,7 @@ for p in pages:
 <title>{esc(p['title'])}</title><meta name="description" content="{esc(p['description'])}"><link rel="canonical" href="{url}"><meta name="robots" content="index,follow">
 {alternates(tool)}
 <link rel="stylesheet" href="/styles.css"><link rel="stylesheet" href="/redesign.css"><link rel="stylesheet" href="/localized.css?v=20260930"><link rel="icon" href="/assets/favicon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
-<script type="application/ld+json">{json.dumps(schema,ensure_ascii=False)}</script><script src="/calendar.js" defer></script><script src="/localized.js?v=20260930" defer></script></head>
+<script type="application/ld+json">{json.dumps(schema,ensure_ascii=False)}</script><script src="/calendar.js" defer></script><script src="/localized.js?v=20260930-2" defer></script></head>
 <body class="localized-page" data-localized="{tool}"><header class="site-header"><div class="wrap nav"><a class="brand" href="{home}"><img src="/assets/logo.svg" alt="" width="39" height="39">Age &amp; Dates<span class="brand-dot">.</span></a><nav class="navlinks" aria-label="{c['tools']}"><a href="#related">{c['tools']}</a></nav></div></header>
 <main><div class="wrap">{language_links(tool,lang,c['language'])}<section class="local-hero">{introduction(p)}
 <form id="localized-form" class="card calculator toolbox" novalidate><h2 class="calculator-title"><span class="form-icon">{icon(tool)}</span>{COPY[lang]["form"]}</h2><div class="formgrid">{fields}</div>{checkbox}<button type="submit" style="margin-top:18px">{p['submit']} <span aria-hidden="true">→</span></button><p class="privacy-line">{c['short']}</p><p id="localized-error" class="form-error" role="alert" tabindex="-1" hidden></p></form>
