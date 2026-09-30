@@ -46,3 +46,19 @@ for(const [start,end,inclusive,expected] of [
 assert.match(L.calculate('between','pt-BR',{start:'19/09/2026',end:'01/09/2026'}).html,/As datas foram invertidas/);
 assert.ok(L.calculate('between','pt-BR',{start:'29/02/2025',end:'01/03/2025'}).error);
 console.log('Birth-year ranges and Portuguese date differences passed.');
+
+// Numeric mobile keyboards can enter exactly eight digits in day-month-year order.
+for(const lang of ['id','de','pt-BR']){
+ const sep=lang==='de'?'.':'/';
+ for(const [compact,formatted] of [['18051990',['18','05','1990'].join(sep)],['29022024',['29','02','2024'].join(sep)],['01010001',['01','01','0001'].join(sep)],['31129999',['31','12','9999'].join(sep)]]){
+  assert.equal(L.parseLocal(compact,lang).toISOString(),L.parseLocal(formatted,lang).toISOString());
+ }
+ assert.equal(L.parseLocal(' 18051990 ',lang).toISOString(),'1990-05-18T00:00:00.000Z');
+ for(const invalid of ['29022025','31042026','00012026','01132026','01010000','1805199','180519900','1805 1990','18a51990','19900518'])assert.equal(L.parseLocal(invalid,lang),null);
+}
+for(const [tool,lang] of [['age','id'],['age','de'],['between','id'],['between','pt-BR'],['date','pt-BR']]){
+ const sep=lang==='de'?'.':'/';
+ const base={start:['18','05','1990'].join(sep),end:['19','09','2026'].join(sep),amount:'30',unit:'days',direction:'add'};
+ assert.deepEqual(L.calculate(tool,lang,{...base,start:'18051990',end:'19092026'}),L.calculate(tool,lang,base));
+}
+console.log('Eight-digit dates match formatted dates on all five tools; invalid and ambiguous input is rejected.');
