@@ -1,3 +1,8 @@
 User-agent: *
 Allow: /
+
+# ChatGPT search crawler; this does not change the existing GPTBot policy.
+User-agent: OAI-SearchBot
+Allow: /
+
 Sitemap: https://ageanddates.com/sitemap.xml
