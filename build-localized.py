@@ -1,4 +1,5 @@
 """Build the localized tool pages. Content is static HTML; calculators run locally."""
+from datetime import date
 from pathlib import Path
 import html,json,re
 from localized_design import COPY, introduction, trust, content, related_cards, icon
@@ -60,15 +61,30 @@ def field(name,label,lang,today=False):
  return f'<label for="{name}">{label}<input id="{name}" name="{name}" type="text" inputmode="numeric" maxlength="10" placeholder="{placeholder}" aria-describedby="{name}-hint" autocomplete="off" required'+(' data-today' if today else '')+f'><span class="form-hint" id="{name}-hint">{hint}</span></label>'
 
 def year_tool(lang):
+ table=''
  if lang=='id':
   title='Lahir tahun berapa, umur berapa?';intro='Jika hanya tahu tahun lahir, hitung rentang usia pada tahun pilihan. Usia tepat bergantung pada apakah ulang tahun sudah lewat.'
   born='Tahun lahir';target='Tahun perhitungan';submit='Hitung dari tahun lahir'
   example='Contoh: kelahiran 1997 berusia 28 atau 29 tahun pada 2026. Sebelum ulang tahun: 28; pada dan setelah ulang tahun: 29. Untuk usia tepat, gunakan tanggal lahir pada kalkulator di atas.'
+  current_year=date.today().year
+  rows='\n'.join(
+   f'<tr><th scope="row">Lahir {birth_year}:</th> <td>{current_year-birth_year-1} tahun sebelum ulang tahun, {current_year-birth_year} tahun setelah ulang tahun</td></tr>'
+   for birth_year in range(1950,2021)
+  )
+  table=f'''
+<section class="local-section" aria-labelledby="year-table-heading">
+<h2 id="year-table-heading">Lahir tahun ... sekarang umur berapa?</h2>
+<div class="year-table-wrap"><table>
+<caption>Tahun lahir → umur di {current_year}</caption>
+<tbody>
+{rows}
+</tbody></table></div>
+</section>'''
  else:
   title='Wie alt bin ich mit meinem Geburtsjahr?';intro='Wenn du nur das Geburtsjahr kennst, berechne die mögliche Altersspanne im gewünschten Jahr. Das genaue Alter hängt davon ab, ob dein Geburtstag schon war.'
   born='Geburtsjahr';target='Bezugsjahr';submit='Alter aus Geburtsjahr berechnen'
   example='Beispiel: Wer 1991 geboren ist, wird 2026 35 Jahre alt. Vor dem Geburtstag sind es 34 Jahre, ab dem Geburtstag 35. Für das genaue Alter nutze oben dein vollständiges Geburtsdatum.'
- return f'''<section class="year-section" aria-labelledby="year-heading"><div class="year-intro"><p class="local-eyebrow">{COPY[lang]["year"]}</p><h2 id="year-heading">{title}</h2><p>{intro}</p><p class="year-example">{example}</p></div><form id="year-form" class="card calculator toolbox" novalidate><div class="formgrid"><label for="birth-year">{born}<input id="birth-year" name="birth-year" type="number" min="1" max="9999" step="1" placeholder="1997" required></label><label for="target-year">{target}<input id="target-year" name="target-year" type="number" min="1" max="9999" step="1" required data-current-year></label></div><button type="submit" style="margin-top:18px">{submit}</button><p id="year-error" class="form-error" role="alert" tabindex="-1" hidden></p><p id="year-result" role="status" hidden></p></form></section>'''
+ return f'''<section class="year-section" aria-labelledby="year-heading"><div class="year-intro"><p class="local-eyebrow">{COPY[lang]["year"]}</p><h2 id="year-heading">{title}</h2><p>{intro}</p><p class="year-example">{example}</p></div><form id="year-form" class="card calculator toolbox" novalidate><div class="formgrid"><label for="birth-year">{born}<input id="birth-year" name="birth-year" type="number" min="1" max="9999" step="1" placeholder="1997" required></label><label for="target-year">{target}<input id="target-year" name="target-year" type="number" min="1" max="9999" step="1" required data-current-year></label></div><button type="submit" style="margin-top:18px">{submit}</button><p id="year-error" class="form-error" role="alert" tabindex="-1" hidden></p><p id="year-result" role="status" hidden></p></form></section>{table}'''
 
 for p in pages:
  lang=p['lang'];c=common[lang];tool=p['tool'];url=BASE+p['url'];home=next(x['url']for x in pages if x['lang']==lang)
