@@ -1,0 +1,34 @@
+{
+  "slug": "wer-ist-18",
+  "layout": "expanded",
+  "title": "Wer ist genau 18 Jahre alt? Geburtszeitraum berechnen",
+  "description": "Wer ist am Stichtag 18 Jahre alt? Berechne das genaue Geburtsdatum und den Geburtszeitraum für jedes Alter von 1 bis 120 Jahren.",
+  "h1": "Wer ist genau 18 Jahre alt? Geburtszeitraum berechnen",
+  "lead": "Berechne, wer an einem bestimmten Stichtag genau Geburtstag hat und welcher Geburtszeitraum zu einem Alter gehört.",
+  "localized": "wer-ist-18",
+  "script": "wer-ist-18.js",
+  "hero_icon_html": "<svg viewBox=\"0 0 32 32\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect x=\"4\" y=\"5\" width=\"24\" height=\"23\" rx=\"5\"/><path d=\"M10 3v5m12-5v5M4 13h24m-18 6h4m4 0h4m-12 5h4\"/></svg>",
+  "form_html": "<form id=\"age-form\" class=\"card calculator toolbox\" aria-label=\"Geburtszeitraum berechnen\">\n        <label for=\"age\">Alter\n          <input id=\"age\" type=\"number\" min=\"1\" max=\"120\" step=\"1\" value=\"18\" required>\n        </label>\n        <label for=\"as-of-date\">Stichtag (TT.MM.JJJJ)\n          <input id=\"as-of-date\" type=\"text\" inputmode=\"numeric\" placeholder=\"TT.MM.JJJJ\" required>\n        </label>\n        <button type=\"submit\">Geburtszeitraum berechnen</button>\n        <output id=\"age-result\" class=\"calculator-title\" for=\"age as-of-date\" aria-live=\"polite\" aria-atomic=\"true\" style=\"white-space: pre-line\"></output>\n        <noscript>Aktiviere JavaScript, um den Geburtszeitraum zu berechnen.</noscript>\n      </form>",
+  "method_html": "\n        <h2>Wie wird der Geburtszeitraum berechnet?</h2>\n        <p>Für den Geburtstag ziehen wir das gewählte Alter vom Stichtag in Jahren ab. Der Geburtszeitraum beginnt einen Tag nach dem Stichtag minus (Alter + 1) Jahre und endet am Stichtag minus Alter. Beide Grenzen zählen dazu.</p>\n        <p>Fehlt der 29. Februar im Zieljahr, verwenden wir den 28. Februar. Der Rechner verwendet diese Kalenderregel auch für die Grenzen des Geburtszeitraums.</p>\n      ",
+  "faq": [
+    {
+      "q": "Welcher Jahrgang wird dieses Jahr 18?",
+      "a": "Im Jahr J wird der Jahrgang J−18 volljährig. Im Jahr 2026 ist das der Jahrgang 2008. Ob jemand am Stichtag schon 18 ist, hängt vom Geburtstag ab."
+    },
+    {
+      "q": "Wer ist an einem Stichtag genau 18 Jahre alt?",
+      "a": "Wer zwischen dem Stichtag minus 19 Jahre plus einem Tag und dem Stichtag minus 18 Jahre geboren wurde, ist nach dieser Kalenderrechnung 18 Jahre alt. Beide Grenztage gehören zum Zeitraum."
+    },
+    {
+      "q": "Wie wird der 29. Februar behandelt?",
+      "a": "Beim Abziehen ganzer Jahre wird der 29. Februar in einem Jahr ohne diesen Tag auf den 28. Februar gesetzt. Das entspricht der Kalenderregel dieses Rechners und gilt auch für die Zeitraumgrenzen."
+    }
+  ],
+  "related_title": "Weitere Rechner",
+  "related_description": "",
+  "related_card_title": "Altersrechner",
+  "related_card_description": "Berechne dein Alter in Jahren, Monaten und Tagen.",
+  "faq_schema": false,
+  "eyebrow_html": "",
+  "after_hero_html": ""
+}
