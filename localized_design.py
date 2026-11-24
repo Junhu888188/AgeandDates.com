@@ -22,6 +22,7 @@ SAMPLES = {
 
 def icon(tool):
  paths={
+  'week':'<rect x="3" y="6" width="26" height="22" rx="4"/><path d="M10 3v6m12-6v6M3 14h26"/><rect x="7" y="18" width="18" height="5" rx="1"/>',
   'age':'<rect x="4" y="5" width="24" height="23" rx="5"/><path d="M10 3v5m12-5v5M4 13h24m-18 6h4m4 0h4m-12 5h4"/>',
   'between':'<rect x="3" y="5" width="26" height="23" rx="5"/><path d="M9 3v5m14-5v5M3 13h26m-18 4-4 4 4 4m10-8 4 4-4 4M8 21h16"/>',
   'date':'<rect x="4" y="5" width="24" height="23" rx="5"/><path d="M10 3v5m12-5v5M4 13h24m-18 8h6m-3-3v6m7-3h4"/>'
@@ -36,8 +37,18 @@ def introduction(p):
 def trust(lang):
  return '<div class="local-trust">'+''.join(f'<span><span aria-hidden="true">✓</span> {escape(t)}</span>' for t in COPY[lang]['trust'])+'</div>'
 
+def week_calculator():
+ return '''<section class="card calculator toolbox" aria-label="Kalenderwochenrechner">
+<label for="week-date">Datum auswählen<input id="week-date" type="date" min="0001-01-01" max="9999-12-31" required></label>
+<div aria-live="polite" aria-atomic="true"><h2 class="calculator-title" id="week-number"></h2><ul id="week-days" hidden></ul></div>
+<noscript>Aktiviere JavaScript, um die Kalenderwoche für dein Datum zu berechnen.</noscript></section>'''
+
 def content(p,c):
  lang=p['lang'];d=COPY[lang]
+ faqs=''.join(f'<details><summary>{escape(q)}</summary><p>{escape(a)}</p></details>' for q,a in p['faq'])
+ if p['tool']=='week':
+  return f'''<section class="local-section detail-grid"><div class="method-card"><h2>{p['rules']}</h2><p>{p['rule']}</p></div>
+<div class="local-faq"><h2>{c['faq']}</h2>{faqs}</div></section>'''
  steps=''.join(f'<li><span class="step-number" aria-hidden="true">0{i+1}</span><h3>{escape(h)}</h3><p>{escape(t)}</p></li>' for i,(h,t) in enumerate(STEPS[(lang,p['tool'])]))
  examples=''
  for i,(text,sample) in enumerate(zip(p['examples'],SAMPLES[p['tool']])):
@@ -45,7 +56,6 @@ def content(p,c):
   if lang=='de':values={k:v.replace('/','.') for k,v in values.items()}
   data=escape(json.dumps(values),quote=True)
   examples+=f'<article class="example-card"><span class="example-number" aria-hidden="true">0{i+1}</span><p>{escape(text)}</p><button class="example-button" type="button" data-example="{data}">{d["tryit"]} <span aria-hidden="true">↗</span><span class="sr-only"> {i+1}</span></button></article>'
- faqs=''.join(f'<details><summary>{escape(q)}</summary><p>{escape(a)}</p></details>' for q,a in p['faq'])
  return f'''<section class="local-section" aria-labelledby="steps-heading"><p class="local-eyebrow">{d['steps']}</p><h2 id="steps-heading">{p['how']}</h2><ol class="steps-grid">{steps}</ol></section>
 <section class="local-section" aria-labelledby="examples-heading"><p class="local-eyebrow">{d['examples']}</p><h2 id="examples-heading">{p['examples_title']}</h2><div class="examples-grid">{examples}</div></section>
 <section class="local-section detail-grid"><div class="method-card"><span class="method-icon">{icon(p['tool'])}</span><h2>{d['method']}</h2><p>{p['context']}</p><details><summary>{p['rules']}</summary><p>{p['rule']}</p></details><details><summary>{p['how']}</summary><p>{p['steps']}</p></details></div><div class="local-faq"><h2>{c['faq']}</h2><p class="section-intro">{d['faq_intro']}</p>{faqs}</div></section>

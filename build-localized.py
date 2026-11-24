@@ -1,8 +1,9 @@
 """Build the localized tool pages. Content is static HTML; calculators run locally."""
+import argparse
 from datetime import date
 from pathlib import Path
 import html,json,re
-from localized_design import COPY, introduction, trust, content, related_cards, icon
+from localized_design import COPY, introduction, trust, content, related_cards, icon, week_calculator
 ROOT=Path(__file__).resolve().parent
 BASE='https://ageanddates.com'
 groups={
@@ -46,6 +47,19 @@ pages.append(dict(lang='pt-BR',tool='between',url='/pt-br/calculadora-entre-data
 pages[2]['h1']='Somar ou Subtrair Dias de uma Data'
 pages[2]['faq'].append(('Como calcular quantos dias há entre duas datas?','Use a Calculadora de Dias entre Duas Datas, disponível em Ferramentas relacionadas. Aqui você informa uma data e uma quantidade para obter uma nova data.'))
 
+week_title = 'Kalenderwoche berechnen: Welche ISO-Woche hat ein Datum?'
+pages.append(dict(
+ lang='de', tool='week', url='/de/kalenderwoche/', title=week_title, h1=week_title,
+ description='Welche KW ist heute? Finde für jedes Datum die Kalenderwoche nach ISO 8601, das Wochenjahr und die Daten von Montag bis Sonntag.',
+ lead='Wähle ein Datum, um die Kalenderwoche und die zugehörigen Tage zu sehen.',
+ rules='Welche Kalenderwoche gilt am Jahreswechsel?',
+ rule='Nach ISO 8601 beginnt die Woche am Montag und endet am Sonntag. Der Donnerstag bestimmt das Wochenjahr. Deshalb können die ersten Januartage noch zur KW 52 oder 53 des Vorjahres gehören. Umgekehrt können die letzten Dezembertage bereits in die KW 1 des Folgejahres fallen.',
+ faq=[
+  ('Wie viele Kalenderwochen hat 2026?', '2026 hat 53 Kalenderwochen. KW 53 beginnt am Montag, dem 28. Dezember 2026, und endet am Sonntag, dem 3. Januar 2027.'),
+  ('Wie finde ich die erste Kalenderwoche eines Jahres?', 'Suche den 4. Januar. Die Woche, in die dieser Tag fällt, ist immer KW 1. So beginnt KW 1 des Jahres 2026 schon am Montag, dem 29. Dezember 2025.'),
+  ('Welche KW trage ich für den 1. Januar 2027 ein?', 'Der 1. Januar 2027 ist ein Freitag und gehört zur KW 53 des Wochenjahres 2026. KW 1 des Jahres 2027 beginnt am Montag, dem 4. Januar.')
+ ]))
+
 common={
  'id':dict(home='Beranda',tools='Alat lainnya',language='Bahasa',hint='DD/MM/YYYY atau 8 digit DDMMYYYY (contoh: 18051990)',copy='Salin hasil',faq='Pertanyaan yang sering diajukan',privacy='Privasi perhitungan',private='Tanggal diproses di perangkat ini. Kode kalkulator tidak mengunggah tanggal, menyimpannya di browser, atau menambahkannya ke URL. Halaman ini tidak memuat analitik. Server hosting tetap dapat menerima data koneksi standar saat halaman dibuka.',short='Tanggal dihitung di perangkat ini, tanpa akun.',legal='Kebijakan privasi (bahasa Inggris)',terms='Ketentuan (bahasa Inggris)',contact='Kontak (bahasa Inggris)',note='Untuk informasi umum, bukan penetapan hukum.',related='Alat terkait'),
  'de':dict(home='Startseite',tools='Weitere Rechner',language='Sprache',hint='TT.MM.JJJJ oder 8 Ziffern TTMMJJJJ (z. B. 18051990)',copy='Ergebnis kopieren',faq='Häufige Fragen',privacy='Datenschutz bei der Berechnung',private='Die Berechnung findet auf deinem Gerät statt. Der Rechner lädt deine Datumsangaben nicht hoch, speichert sie nicht im Browserspeicher und schreibt sie nicht in die URL. Diese Seite lädt keine Analysesoftware. Beim Seitenaufruf kann der Hosting-Server übliche Verbindungsdaten erhalten.',short='Berechnung auf deinem Gerät, ohne Konto.',legal='Datenschutzerklärung (Englisch)',terms='Nutzungsbedingungen (Englisch)',contact='Kontakt (Englisch)',note='Allgemeine Information, keine rechtliche Altersfeststellung.',related='Weitere Rechner'),
@@ -86,47 +100,64 @@ def year_tool(lang):
   example='Beispiel: Wer 1991 geboren ist, wird 2026 35 Jahre alt. Vor dem Geburtstag sind es 34 Jahre, ab dem Geburtstag 35. Für das genaue Alter nutze oben dein vollständiges Geburtsdatum.'
  return f'''<section class="year-section" aria-labelledby="year-heading"><div class="year-intro"><p class="local-eyebrow">{COPY[lang]["year"]}</p><h2 id="year-heading">{title}</h2><p>{intro}</p><p class="year-example">{example}</p></div><form id="year-form" class="card calculator toolbox" novalidate><div class="formgrid"><label for="birth-year">{born}<input id="birth-year" name="birth-year" type="number" min="1" max="9999" step="1" placeholder="1997" required></label><label for="target-year">{target}<input id="target-year" name="target-year" type="number" min="1" max="9999" step="1" required data-current-year></label></div><button type="submit" style="margin-top:18px">{submit}</button><p id="year-error" class="form-error" role="alert" tabindex="-1" hidden></p><p id="year-result" role="status" hidden></p></form></section>{table}'''
 
-for p in pages:
- lang=p['lang'];c=common[lang];tool=p['tool'];url=BASE+p['url'];home=next(x['url']for x in pages if x['lang']==lang)
+def standard_calculator(p,c):
+ lang=p['lang'];tool=p['tool']
  fields=field('start',p['start'],lang,tool=='date')
  if tool!='date':fields+=field('end',p['end'],lang,True)
  else:fields+='<label for="direction">Operação<select id="direction" name="direction"><option value="add">Somar</option><option value="subtract">Subtrair</option></select></label><label for="amount">Quantidade<input id="amount" name="amount" type="number" value="1" min="0" step="1" required></label><label for="unit">Unidade<select id="unit" name="unit"><option value="days">Dias</option><option value="weeks">Semanas</option><option value="months">Meses</option><option value="years">Anos</option></select></label>'
  checkbox=('<label class="check-row"><input name="inclusive" type="checkbox">'+('Incluir as duas datas (inicial e final)' if lang=='pt-BR' else 'Hitung kedua tanggal (awal dan akhir)')+'</label>') if tool=='between' else ''
+ return f'''<form id="localized-form" class="card calculator toolbox" novalidate><h2 class="calculator-title"><span class="form-icon">{icon(tool)}</span>{COPY[lang]["form"]}</h2><div class="formgrid">{fields}</div>{checkbox}<button type="submit" style="margin-top:18px">{p['submit']} <span aria-hidden="true">→</span></button><p class="privacy-line">{c['short']}</p><p id="localized-error" class="form-error" role="alert" tabindex="-1" hidden></p></form>'''
+
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument('--page', choices=[p['url'] for p in pages], help='Build only this page and its sitemap entry.')
+args = parser.parse_args()
+selected_pages = [p for p in pages if not args.page or p['url'] == args.page]
+for p in selected_pages:
+ lang=p['lang'];c=common[lang];tool=p['tool'];url=BASE+p['url'];home=next(x['url']for x in pages if x['lang']==lang)
  related=[(x['url'],x['h1'])for x in pages if x['lang']==lang and x['url']!=p['url']]
- if lang=='de':related=[('/days-between-dates.html','Tage zwischen zwei Daten (Englisch)'),('/date-calculator.html','Datum addieren oder abziehen (Englisch)')]
+ if lang=='de' and tool=='age':related.extend([('/days-between-dates.html','Tage zwischen zwei Daten (Englisch)'),('/date-calculator.html','Datum addieren oder abziehen (Englisch)')])
  if lang=='pt-BR':related.append(('/birthday-countdown.html','Contagem até o aniversário (inglês)'))
  schema={'@context':'https://schema.org','@graph':[{'@type':'WebApplication','name':p['h1'],'url':url,'inLanguage':lang,'description':p['description'],'applicationCategory':'UtilitiesApplication','operatingSystem':'Any','browserRequirements':'Requires JavaScript','isAccessibleForFree':True},{'@type':'BreadcrumbList','itemListElement':[{'@type':'ListItem','position':1,'name':'Age & Dates','item':BASE+'/'},{'@type':'ListItem','position':2,'name':p['h1'],'item':url}]}]}
+ if tool=='week':
+  calculator=week_calculator()
+  results=''
+  script='/de/kalenderwoche/kalenderwoche.js'
+ else:
+  calculator=standard_calculator(p,c)
+  results=f'''<div class="local-result-wrap"><div id="localized-result" class="card result" aria-live="polite" hidden></div></div><div class="copy-area"><button id="copy-result" type="button" hidden>{c['copy']}</button><p id="copy-status" class="note" role="status"></p></div>'''
+  script='/localized.js?v=20260930-3'
  output=f'''<!doctype html>
 <html lang="{lang}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>{esc(p['title'])}</title><meta name="description" content="{esc(p['description'])}"><link rel="canonical" href="{url}"><meta name="robots" content="index,follow">
-{alternates(tool)}
+{alternates(tool) if tool in groups else ''}
 <link rel="stylesheet" href="/styles.css"><link rel="stylesheet" href="/redesign.css"><link rel="stylesheet" href="/localized.css?v=20260930"><link rel="icon" href="/assets/favicon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
-<script type="application/ld+json">{json.dumps(schema,ensure_ascii=False)}</script><script src="/calendar.js" defer></script><script src="/localized.js?v=20260930-3" defer></script></head>
+<script type="application/ld+json">{json.dumps(schema,ensure_ascii=False)}</script><script src="/calendar.js" defer></script><script src="{script}" defer></script></head>
 <body class="localized-page" data-localized="{tool}"><header class="site-header"><div class="wrap nav"><a class="brand" href="{home}"><img src="/assets/logo.svg" alt="" width="39" height="39">Age &amp; Dates<span class="brand-dot">.</span></a><nav class="navlinks" aria-label="{c['tools']}"><a href="#related">{c['tools']}</a></nav></div></header>
-<main><div class="wrap">{language_links(tool,lang,c['language'])}<section class="local-hero">{introduction(p)}
-<form id="localized-form" class="card calculator toolbox" novalidate><h2 class="calculator-title"><span class="form-icon">{icon(tool)}</span>{COPY[lang]["form"]}</h2><div class="formgrid">{fields}</div>{checkbox}<button type="submit" style="margin-top:18px">{p['submit']} <span aria-hidden="true">→</span></button><p class="privacy-line">{c['short']}</p><p id="localized-error" class="form-error" role="alert" tabindex="-1" hidden></p></form>
+<main><div class="wrap">{language_links(tool,lang,c['language']) if tool in groups else ''}<section class="local-hero">{introduction(p)}
+{calculator}
 </section>{trust(lang)}
-<div class="local-result-wrap"><div id="localized-result" class="card result" aria-live="polite" hidden></div></div><div class="copy-area"><button id="copy-result" type="button" hidden>{c['copy']}</button><p id="copy-status" class="note" role="status"></p></div>
+{results}
 {year_tool(lang) if tool=='age' else ''}
 {content(p,c)}
 {related_cards(p,related,pages)}</div></main>
 <footer class="footer"><div class="wrap"><div class="footerlinks"><a href="{home}">{c['home']}</a><a href="/privacy.html">{c['legal']}</a><a href="/terms.html">{c['terms']}</a><a href="/contact.html">{c['contact']}</a></div>© 2026 Age &amp; Dates. {c['note']}</div></footer></body></html>
 '''
  dest=ROOT/p['url'].strip('/')/'index.html';dest.parent.mkdir(parents=True,exist_ok=True);dest.write_text(output,encoding="utf-8")
-# Reciprocal tags and visible language links on each English equivalent.
-for tool,g in groups.items():
- dest=ROOT/('index.html' if g[0][1]=='/' else g[0][1].lstrip('/'));s=dest.read_text(encoding="utf-8")
- s=re.sub(r'\n?<!-- P0 languages -->.*?<!-- /P0 languages -->','',s,flags=re.S)
- s=s.replace('</head>','<!-- P0 languages -->'+alternates(tool)+'<!-- /P0 languages --></head>')
- s=s.replace('</main>','<!-- P0 languages --><div class="wrap">'+language_links(tool,'en','Language')+'</div><!-- /P0 languages --></main>')
- if 'href="localized.css"' not in s:s=s.replace('</head>','<link rel="stylesheet" href="localized.css"></head>')
- dest.write_text(s,encoding="utf-8")
-# A homepage entry for all four P0 pages, without implying equivalent intents.
-dest=ROOT/'index.html';s=dest.read_text(encoding="utf-8");s=re.sub(r'<!-- P0 directory -->.*?<!-- /P0 directory -->','',s,flags=re.S)
-directory='<section class="section wrap"><h2>Tools in your language</h2><div class="related-links">'+''.join(f'<a href="{p["url"]}" lang="{p["lang"]}">{p["h1"]}</a>'for p in pages)+'</div></section>'
-s=s.replace('</main>','<!-- P0 directory -->'+directory+'<!-- /P0 directory --></main>');dest.write_text(s,encoding="utf-8")
+if not args.page:
+ # Reciprocal tags and visible language links on each English equivalent.
+ for tool,g in groups.items():
+  dest=ROOT/('index.html' if g[0][1]=='/' else g[0][1].lstrip('/'));s=dest.read_text(encoding="utf-8")
+  s=re.sub(r'\n?<!-- P0 languages -->.*?<!-- /P0 languages -->','',s,flags=re.S)
+  s=s.replace('</head>','<!-- P0 languages -->'+alternates(tool)+'<!-- /P0 languages --></head>')
+  s=s.replace('</main>','<!-- P0 languages --><div class="wrap">'+language_links(tool,'en','Language')+'</div><!-- /P0 languages --></main>')
+  if 'href="localized.css"' not in s:s=s.replace('</head>','<link rel="stylesheet" href="localized.css"></head>')
+  dest.write_text(s,encoding="utf-8")
+ # The English homepage directory lists the tools with English equivalents.
+ dest=ROOT/'index.html';s=dest.read_text(encoding="utf-8");s=re.sub(r'<!-- P0 directory -->.*?<!-- /P0 directory -->','',s,flags=re.S)
+ directory='<section class="section wrap"><h2>Tools in your language</h2><div class="related-links">'+''.join(f'<a href="{p["url"]}" lang="{p["lang"]}">{p["h1"]}</a>'for p in pages if p['tool'] in groups)+'</div></section>'
+ s=s.replace('</main>','<!-- P0 directory -->'+directory+'<!-- /P0 directory --></main>');dest.write_text(s,encoding="utf-8")
 dest=ROOT/'sitemap.xml';s=dest.read_text(encoding="utf-8")
-for p in pages:
+for p in selected_pages:
  if BASE+p['url'] not in s:s=s.replace('</urlset>',f'<url><loc>{BASE+p["url"]}</loc></url>\n</urlset>')
 dest.write_text(s,encoding="utf-8")
-print('Built 5 localized pages; updated English equivalents and sitemap.')
+print(f'Built {len(selected_pages)} localized pages and updated the sitemap.')
