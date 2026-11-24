@@ -99,3 +99,48 @@ console.log('New Year countdown and 2027 FAQ rollover passed');
  assert.equal(elements['business-days-result'].textContent, '');
 }
 console.log('Business days calculator counts, endpoints, and validation passed');
+
+// Local wall-clock durations ignore time zones and daylight-saving transitions.
+{
+ const page = fs.readFileSync('date-time-duration.html', 'utf8');
+ const [, script] = page.match(/<script id="date-time-duration-calculation">([\s\S]*?)<\/script>/);
+ const window = {ADCalendar: C};
+ vm.runInNewContext(script, {window});
+ const count = window.calculateDateTimeDuration;
+ function check(start, startTime, end, endTime, expected) {
+   assert.deepEqual(JSON.parse(JSON.stringify(count(start, startTime, end, endTime))),
+     {days: expected[0], hours: expected[1], minutes: expected[2], totalHours: expected[3], totalMinutes: expected[4]});
+ }
+ check('2026-01-05', '09:15', '2026-01-05', '17:45', [0, 8, 30, 8.5, 510]);
+ check('2026-01-05', '23:30', '2026-01-06', '01:15', [0, 1, 45, 1.75, 105]);
+ check('2026-01-31', '23:00', '2026-02-01', '02:00', [0, 3, 0, 3, 180]);
+ check('2028-02-28', '22:00', '2028-03-01', '02:00', [1, 4, 0, 28, 1680]);
+ check('2026-01-05', '09:15', '2026-01-05', '09:15', [0, 0, 0, 0, 0]);
+ check('2026-10-04', '01:00', '2026-10-04', '04:00', [0, 3, 0, 3, 180]);
+ assert.throws(() => count('2026-01-05', '10:00', '2026-01-05', '09:59'), /End date and time must be on or after/);
+ assert.throws(() => count('2026-01-05', '10:00', '2026-01-04', '11:00'), /End date and time must be on or after/);
+ assert.throws(() => count('2026-02-30', '10:00', '2026-03-01', '11:00'), /Enter valid/);
+ assert.throws(() => count('2026-01-05', '24:00', '2026-01-06', '11:00'), /Enter valid/);
+ assert.throws(() => count('2026-01-05', '', '2026-01-06', '11:00'), /Enter valid/);
+
+ const elements = Object.fromEntries(['start-date', 'end-date', 'start-time', 'end-time',
+   'date-time-duration-result', 'date-time-duration-error', 'date-time-duration-form'].map(id => [id, {}]));
+ const handlers = {};
+ elements['date-time-duration-form'].addEventListener = (name, handler) => { handlers[name] = handler; };
+ const [, uiScript] = page.match(/<script id="date-time-duration-ui">([\s\S]*?)<\/script>/);
+ vm.runInNewContext(uiScript, {window, document: {getElementById: id => elements[id]}});
+ assert.equal(elements['date-time-duration-result'].textContent,
+   '0 days 8 hours 0 minutes · Total hours: 8.00 · Total minutes: 480');
+ elements['start-date'].value = '2028-02-28';
+ elements['start-time'].value = '22:00';
+ elements['end-date'].value = '2028-03-01';
+ elements['end-time'].value = '02:00';
+ handlers.submit({preventDefault() {}});
+ assert.equal(elements['date-time-duration-result'].textContent,
+   '1 days 4 hours 0 minutes · Total hours: 28.00 · Total minutes: 1680');
+ elements['end-date'].value = '2028-02-28';
+ handlers.change();
+ assert.equal(elements['date-time-duration-error'].textContent, 'End date and time must be on or after start date and time.');
+ assert.equal(elements['date-time-duration-result'].textContent, '');
+}
+console.log('Date and time duration calculation, wall-clock behavior, and validation passed');
