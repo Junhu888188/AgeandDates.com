@@ -52,3 +52,50 @@ console.log('All 12 calculator handlers and error cases passed');
  assert.equal(faq.textContent, '1 day ago.');
 }
 console.log('New Year countdown and 2027 FAQ rollover passed');
+
+// Business-day counts use UTC calendar dates and independently selectable endpoints.
+{
+ const page = fs.readFileSync('business-days-calculator.html', 'utf8');
+ const [, script] = page.match(/<script id="business-days-calculation">([\s\S]*?)<\/script>/);
+ const window = {ADCalendar: C};
+ vm.runInNewContext(script, {window});
+ const count = window.calculateBusinessDays;
+ function check(start, end, includeStart, includeEnd, expected) {
+   assert.deepEqual(JSON.parse(JSON.stringify(count(start, end, includeStart, includeEnd))),
+     {businessDays: expected[0], weekendDays: expected[1], calendarDays: expected[2]});
+ }
+ check('2026-01-05', '2026-01-05', true, true, [1, 0, 1]);
+ check('2026-01-03', '2026-01-03', true, true, [0, 1, 1]);
+ for (const [start, end] of [[true, false], [false, true], [false, false]]) {
+   check('2026-01-05', '2026-01-05', start, end, [0, 0, 0]);
+   check('2026-01-03', '2026-01-03', start, end, [0, 0, 0]);
+ }
+ check('2026-01-02', '2026-01-05', true, true, [2, 2, 4]);
+ check('2026-01-02', '2026-01-05', true, false, [1, 2, 3]);
+ check('2026-01-02', '2026-01-05', false, true, [1, 2, 3]);
+ check('2026-01-02', '2026-01-05', false, false, [0, 2, 2]);
+ check('2026-01-03', '2026-01-05', false, true, [1, 1, 2]);
+ check('2026-12-31', '2027-01-04', true, true, [3, 2, 5]);
+ check('2026-01-01', '2026-12-31', true, true, [261, 104, 365]);
+ assert.equal(count('2026-01-01', '2026-12-31').businessDays, 261);
+ assert.throws(() => count('2026-01-05', '2026-01-02'), /Start date must be on or before end date/);
+ assert.throws(() => count('2026-02-30', '2026-03-01'), /Enter a valid start date and end date/);
+
+ const elements = Object.fromEntries(['start-date', 'end-date', 'include-start', 'include-end',
+   'business-days-result', 'business-days-error', 'business-days-form'].map(id => [id, {}]));
+ elements['include-start'].checked = elements['include-end'].checked = true;
+ const handlers = {};
+ elements['business-days-form'].addEventListener = (name, handler) => { handlers[name] = handler; };
+ const [, uiScript] = page.match(/<script id="business-days-ui">([\s\S]*?)<\/script>/);
+ vm.runInNewContext(uiScript, {window, document: {getElementById: id => elements[id]}});
+ elements['start-date'].value = '2026-01-01';
+ elements['end-date'].value = '2026-12-31';
+ handlers.submit({preventDefault() {}});
+ assert.equal(elements['business-days-result'].textContent,
+   'Business days (Monday–Friday): 261 · Weekend days: 104 · Total calendar days: 365');
+ elements['end-date'].value = '2025-12-31';
+ handlers.change();
+ assert.equal(elements['business-days-error'].textContent, 'Start date must be on or before end date.');
+ assert.equal(elements['business-days-result'].textContent, '');
+}
+console.log('Business days calculator counts, endpoints, and validation passed');

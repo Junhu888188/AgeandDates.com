@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Business Days Between Two Dates</title>
+  <meta name="description" content="Use this working days calculator to count weekdays, weekend days, and calendar days between two dates.">
+  <link rel="canonical" href="https://ageanddates.com/business-days-calculator.html">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="redesign.css">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="assets/favicon.ico" sizes="16x16 32x32">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Age &amp; Dates">
+  <meta property="og:title" content="Business Days Between Two Dates">
+  <meta property="og:description" content="Use this working days calculator to count weekdays, weekend days, and calendar days between two dates.">
+  <meta property="og:url" content="https://ageanddates.com/business-days-calculator.html">
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "@id": "https://ageanddates.com/business-days-calculator.html#faq",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "How are business days calculated?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Business days are Monday through Friday. Only Saturdays and Sundays are excluded; public holidays are not deducted. Include or exclude either endpoint using the checkboxes."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How many business days are in a year?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "It depends on the year. In 2026 there are 261 Monday-to-Friday business days and 104 weekend days, counting January 1 through December 31. Public holidays are not deducted."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What happens if the start and end dates are the same?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "With both endpoints included, a weekday counts as one business day and a weekend date counts as one weekend day. If either endpoint is excluded, the count is zero."
+      }
+    }
+  ]
+}
+  </script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap nav">
+      <a class="brand" href="index.html"><img src="assets/logo.svg" alt="" width="39" height="39">Age &amp; Dates<span class="brand-dot">.</span></a>
+      <nav class="navlinks" aria-label="Main navigation"><a href="index.html#tools">Explore tools</a><a href="index.html#about">Our approach</a></nav>
+    </div>
+  </header>
+  <main>
+    <div class="wrap">
+      <div class="breadcrumbs"><a href="index.html">Home</a> / Business days calculator</div>
+      <section class="toolhero">
+        <h1>Business Days Between Two Dates</h1>
+        <p>Use this working days calculator to count Monday through Friday between two dates.</p>
+        <form id="business-days-form">
+          <p><label for="start-date">Start date</label> <input id="start-date" type="date" required></p>
+          <p><label for="end-date">End date</label> <input id="end-date" type="date" required></p>
+          <p><label><input id="include-start" type="checkbox" checked> Include start date</label></p>
+          <p><label><input id="include-end" type="checkbox" checked> Include end date</label></p>
+          <button type="submit">Calculate business days</button>
+        </form>
+        <p id="business-days-error" role="alert"></p>
+        <div id="business-days-result" aria-live="polite"></div>
+        <noscript><p>Enable JavaScript to calculate business days.</p></noscript>
+        <p>Only Saturdays and Sundays are excluded. Public holidays are not deducted.</p>
+      </section>
+      <section class="section prose">
+        <div class="faq" id="faq">
+          <h2>Frequently asked questions</h2>
+          <details>
+            <summary>How are business days calculated?</summary>
+            <p>Business days are Monday through Friday. Only Saturdays and Sundays are excluded; public holidays are not deducted. Include or exclude either endpoint using the checkboxes.</p>
+          </details>
+          <details>
+            <summary>How many business days are in a year?</summary>
+            <p>It depends on the year. In 2026 there are 261 Monday-to-Friday business days and 104 weekend days, counting January 1 through December 31. Public holidays are not deducted.</p>
+          </details>
+          <details>
+            <summary>What happens if the start and end dates are the same?</summary>
+            <p>With both endpoints included, a weekday counts as one business day and a weekend date counts as one weekend day. If either endpoint is excluded, the count is zero.</p>
+          </details>
+        </div>
+      </section>
+    </div>
+    <section class="section wrap">
+      <h2>Keep exploring</h2>
+      <div class="related-links">
+        <a href="days-between-dates.html">Days between dates</a>
+        <a href="date-calculator.html">Date calculator</a>
+        <a href="days-until-new-year.html">New Year's Day countdown</a>
+      </div>
+    </section>
+  </main>
+  <footer class="footer">
+    <div class="wrap">
+      <div class="footerlinks"><a href="index.html">Home</a><a href="privacy.html">Privacy</a><a href="terms.html">Terms</a><a href="contact.html">Contact</a></div>
+      © 2026 Age &amp; Dates. Calculations are for general informational use.
+    </div>
+  </footer>
+  <script src="calendar.js"></script>
+  <script id="business-days-calculation">
+    function calculateBusinessDays(startDate, endDate, includeStart = true, includeEnd = true) {
+      const calendar = window.ADCalendar;
+      const start = calendar.parse(startDate);
+      const end = calendar.parse(endDate);
+      if (!start || !end) throw new Error('Enter a valid start date and end date.');
+      if (start > end) throw new Error('Start date must be on or before end date.');
+      const calendarDays = Math.max(0, calendar.days(start, end) + 1 - Number(!includeStart) - Number(!includeEnd));
+      const first = calendar.addDays(start, includeStart ? 0 : 1);
+      let businessDays = Math.floor(calendarDays / 7) * 5;
+      for (let i = 0; i < calendarDays % 7; i++) {
+        const weekday = calendar.addDays(first, i).getUTCDay();
+        if (weekday !== 0 && weekday !== 6) businessDays++;
+      }
+      return {businessDays, weekendDays: calendarDays - businessDays, calendarDays};
+    }
+    window.calculateBusinessDays = calculateBusinessDays;
+  </script>
+  <script id="business-days-ui">
+    const calendar = window.ADCalendar;
+    const startInput = document.getElementById('start-date');
+    const endInput = document.getElementById('end-date');
+    const includeStart = document.getElementById('include-start');
+    const includeEnd = document.getElementById('include-end');
+    const result = document.getElementById('business-days-result');
+    const error = document.getElementById('business-days-error');
+    const form = document.getElementById('business-days-form');
+    startInput.value = endInput.value = calendar.iso(calendar.today());
+
+    function updateBusinessDays() {
+      error.textContent = '';
+      result.textContent = '';
+      try {
+        const counts = window.calculateBusinessDays(startInput.value, endInput.value, includeStart.checked, includeEnd.checked);
+        result.textContent = 'Business days (Monday–Friday): ' + counts.businessDays +
+          ' · Weekend days: ' + counts.weekendDays + ' · Total calendar days: ' + counts.calendarDays;
+      } catch (exception) {
+        error.textContent = exception.message;
+      }
+    }
+    form.addEventListener('submit', event => {
+      event.preventDefault();
+      updateBusinessDays();
+    });
+    form.addEventListener('change', updateBusinessDays);
+    updateBusinessDays();
+  </script>
+</body>
+</html>
