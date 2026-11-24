@@ -1,0 +1,34 @@
+{
+  "slug": "alter-in-monaten",
+  "layout": "expanded",
+  "title": "Alter in Monaten berechnen: Wie viele Monate bin ich alt?",
+  "description": "Berechne dein Alter in vollen Kalendermonaten und verbleibenden Tagen. Gib dein Geburtsdatum ein und wähle heute oder einen anderen Stichtag.",
+  "h1": "Alter in Monaten berechnen: Wie viele Monate bin ich alt?",
+  "lead": "Wer am 15.03.1990 geboren wurde, ist am 24.07.2024 genau 412 Monate und 9 Tage alt.",
+  "localized": "months",
+  "script": "alter-in-monaten.js",
+  "hero_icon_html": "<svg viewBox=\"0 0 32 32\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect x=\"4\" y=\"5\" width=\"24\" height=\"23\" rx=\"5\"/><path d=\"M10 3v5m12-5v5M4 13h24m-18 6h4m4 0h4m-12 5h4\"/></svg>",
+  "form_html": "<form id=\"month-form\" class=\"card calculator toolbox\" aria-label=\"Alter in Monaten berechnen\">\n        <label for=\"birth-date\">Geburtsdatum (TT.MM.JJJJ)\n          <input id=\"birth-date\" type=\"text\" inputmode=\"numeric\" placeholder=\"TT.MM.JJJJ\" required>\n        </label>\n        <label for=\"as-of-date\">Stichtag (TT.MM.JJJJ)\n          <input id=\"as-of-date\" type=\"text\" inputmode=\"numeric\" placeholder=\"TT.MM.JJJJ\" required>\n        </label>\n        <button type=\"submit\">Alter berechnen</button>\n        <output id=\"month-result\" class=\"calculator-title\" for=\"birth-date as-of-date\" aria-live=\"polite\" aria-atomic=\"true\"></output>\n        <noscript>Aktiviere JavaScript, um dein Alter in Monaten zu berechnen.</noscript>\n      </form>",
+  "method_html": "\n        <h2>Wann ist ein Monat voll?</h2>\n        <p>Der Rechner zählt volle Kalendermonate ab dem Geburtsdatum. Jeder Monat ist an dem Tag voll, der dieselbe Tageszahl wie der Geburtstag hat. Fehlt dieser Tag, gilt der letzte Tag des Monats. Die Tage danach zählen als Resttage.</p>\n        <p>Bei einem Geburtstag am 31. Januar ist der erste Monat am 28. Februar voll, im Schaltjahr am 29. Februar. Zwei Monate sind in beiden Fällen am 31. März voll.</p>\n      ",
+  "faq": [
+    {
+      "q": "Wie viele Monate ist ein 2-Jähriger?",
+      "a": "24 Monate. So alt ist ein Kind an seinem zweiten Geburtstag."
+    },
+    {
+      "q": "Wie zählt der Rechner bei einem Geburtstag am 29. Februar?",
+      "a": "In einem Jahr ohne 29. Februar gilt der 28. Februar. Wer am 29.02.2024 geboren wurde, ist am 28.02.2025 genau 12 Monate alt und am 01.03.2025 genau 12 Monate und 1 Tag."
+    },
+    {
+      "q": "Was zeigt der Rechner vor dem ersten vollen Monat an?",
+      "a": "Er zeigt 0 Monate und die seit der Geburt vergangenen Tage an. Ein am 5. Juni geborenes Baby ist am 20. Juni also 0 Monate und 15 Tage alt."
+    }
+  ],
+  "related_title": "Weitere Rechner",
+  "related_description": "",
+  "related_card_title": "Altersrechner",
+  "related_card_description": "Berechne dein Alter in Jahren, Monaten und Tagen.",
+  "faq_schema": false,
+  "eyebrow_html": "",
+  "after_hero_html": ""
+}
