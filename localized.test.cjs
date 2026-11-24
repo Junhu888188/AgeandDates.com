@@ -1,5 +1,22 @@
 const assert=require('node:assert/strict');
 const L=require('./localized.js');
+const calendar = require('./calendar.js');
+for (const [date, year, week, monday, sunday] of [
+ ['2026-01-01', 2026, 1, '2025-12-29', '2026-01-04'],
+ ['2026-12-31', 2026, 53, '2026-12-28', '2027-01-03'],
+ ['2027-01-01', 2026, 53, '2026-12-28', '2027-01-03'],
+ ['2020-12-31', 2020, 53, '2020-12-28', '2021-01-03'],
+ ['2021-01-03', 2020, 53, '2020-12-28', '2021-01-03'],
+ ['2022-01-01', 2021, 52, '2021-12-27', '2022-01-02'],
+ ['2024-12-30', 2025, 1, '2024-12-30', '2025-01-05'],
+ ['2027-01-04', 2027, 1, '2027-01-04', '2027-01-10']
+]) {
+ const input = calendar.parse(date);
+ const result = calendar.isoWeek(input);
+ assert.deepEqual([result.year, result.week, calendar.iso(result.monday), calendar.iso(result.sunday)],
+                  [year, week, monday, sunday], date);
+ assert.equal(calendar.iso(input), date);
+}
 const age=(lang,start,end)=>L.calculate('age',lang,{start,end});
 assert.equal(L.parseLocal('29/02/2025','id'),null);
 assert.equal(L.parseLocal('01/01/0000','id'),null);
