@@ -25,3 +25,30 @@ const real=run('home',{'#dob':'1990-05-18','#asof':'2026-09-19'});assert.match(r
 assert.match(run('home',{'#dob':'9999-01-01','#asof':'9999-12-31'})['#form-error'].textContent,/9999/);
 assert.match(run('home',{'#dob':'2030-01-01','#asof':'2026-01-01'})['#form-error'].textContent,/on or after/);
 console.log('All 12 calculator handlers and error cases passed');
+
+// Keep the page open across New Year's Day and exercise its midnight refresh.
+{
+ const page = fs.readFileSync('days-until-new-year.html', 'utf8');
+ const [, script] = page.match(/<script id="new-year-countdown">([\s\S]*?)<\/script>/);
+ const result = {}, faq = {};
+ const elements = {'new-year-result': result, 'new-year-2027-result': faq};
+ let localDate = '2026-12-31';
+ let refresh;
+ vm.runInNewContext(script, {
+   window: {ADCalendar: {...C, today: () => C.parse(localDate)}},
+   document: {getElementById: id => elements[id], addEventListener() {}},
+   setTimeout(callback) { refresh = callback; },
+   clearTimeout() {}
+ });
+ assert.equal(result.textContent, '1 day until January 1, 2027');
+ assert.equal(faq.textContent, '1 day to go.');
+ localDate = '2027-01-01';
+ refresh();
+ assert.equal(result.textContent, '0 days until January 1, 2027');
+ assert.equal(faq.textContent, 'Today is New Year’s Day 2027.');
+ localDate = '2027-01-02';
+ refresh();
+ assert.equal(result.textContent, '364 days until January 1, 2028');
+ assert.equal(faq.textContent, '1 day ago.');
+}
+console.log('New Year countdown and 2027 FAQ rollover passed');

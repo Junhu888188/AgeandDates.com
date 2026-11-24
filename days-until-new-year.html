@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>How Many Days Until New Year's Day?</title>
+  <meta name="description" content="See how many calendar days remain until January 1, based on today's date in your time zone.">
+  <link rel="canonical" href="https://ageanddates.com/days-until-new-year.html">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="redesign.css">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="assets/favicon.ico" sizes="16x16 32x32">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Age &amp; Dates">
+  <meta property="og:title" content="How Many Days Until New Year's Day?">
+  <meta property="og:description" content="See how many calendar days remain until January 1, based on today's date in your time zone.">
+  <meta property="og:url" content="https://ageanddates.com/days-until-new-year.html">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "@id": "https://ageanddates.com/days-until-new-year.html#faq",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "How many days until New Year 2027?",
+        "acceptedAnswer": {"@type": "Answer", "text": "New Year 2027 falls on Friday, January 1. From December 31, 2026, it is one day away."}
+      },
+      {
+        "@type": "Question",
+        "name": "What does the countdown show on January 1?",
+        "acceptedAnswer": {"@type": "Answer", "text": "It shows 0 days all day. At midnight on January 2, it starts counting down to January 1 of the following year."}
+      },
+      {
+        "@type": "Question",
+        "name": "Does daylight saving time change the count?",
+        "acceptedAnswer": {"@type": "Answer", "text": "No. A calendar day counts as one day even when the clocks move forward or back."}
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap nav">
+      <a class="brand" href="index.html"><img src="assets/logo.svg" alt="" width="39" height="39">Age &amp; Dates<span class="brand-dot">.</span></a>
+      <nav class="navlinks" aria-label="Main navigation"><a href="index.html#tools">Explore tools</a><a href="index.html#about">Our approach</a></nav>
+    </div>
+  </header>
+  <main>
+    <div class="wrap">
+      <div class="breadcrumbs"><a href="index.html">Home</a> / New Year's Day countdown</div>
+      <section class="toolhero">
+        <h1>How Many Days Until New Year's Day?</h1>
+        <p aria-live="polite"><strong id="new-year-result" style="font-size:clamp(1.5rem,4vw,2.5rem)"></strong></p>
+        <noscript><p>Enable JavaScript to see the countdown for your local date.</p></noscript>
+        <p>We count one day for each midnight between today's date and January 1 in your local time zone.</p>
+      </section>
+      <section class="section prose">
+        <div class="faq" id="faq">
+          <h2>Frequently asked questions</h2>
+          <details>
+            <summary>How many days until New Year 2027?</summary>
+            <p><strong id="new-year-2027-result"></strong> New Year 2027 falls on Friday, January 1. From December 31, 2026, it is one day away.</p>
+          </details>
+          <details>
+            <summary>What does the countdown show on January 1?</summary>
+            <p>It shows 0 days all day. At midnight on January 2, it starts counting down to January 1 of the following year.</p>
+          </details>
+          <details>
+            <summary>Does daylight saving time change the count?</summary>
+            <p>No. A calendar day counts as one day even when the clocks move forward or back.</p>
+          </details>
+        </div>
+      </section>
+    </div>
+    <section class="section wrap">
+      <h2>Keep exploring</h2>
+      <div class="related-links">
+        <a href="birthday-countdown.html">Birthday countdown</a>
+        <a href="days-between-dates.html">Days between dates</a>
+        <a href="date-calculator.html">Date calculator</a>
+      </div>
+    </section>
+  </main>
+  <footer class="footer">
+    <div class="wrap">
+      <div class="footerlinks"><a href="index.html">Home</a><a href="privacy.html">Privacy</a><a href="terms.html">Terms</a><a href="contact.html">Contact</a></div>
+      © 2026 Age &amp; Dates. Calculations are for general informational use.
+    </div>
+  </footer>
+  <script src="calendar.js"></script>
+  <script id="new-year-countdown">
+    const calendar = window.ADCalendar;
+    const newYear2027 = calendar.parse('2027-01-01');
+    let midnightTimer;
+
+    function dayCount(days) {
+      return days === 1 ? '1 day' : days + ' days';
+    }
+
+    function updateCountdown() {
+      const midnight = new Date();
+      midnight.setHours(24, 0, 0, 0);
+      const today = calendar.today();
+      const january1 = new Date(today);
+      january1.setUTCMonth(0, 1);
+      const nextNewYear = calendar.nextBirthday(january1, today);
+      const days = calendar.days(today, nextNewYear);
+      document.getElementById('new-year-result').textContent =
+        dayCount(days) + ' until January 1, ' + nextNewYear.getUTCFullYear();
+
+      const daysTo2027 = calendar.days(today, newYear2027);
+      let answer = 'Today is New Year’s Day 2027.';
+      if (daysTo2027 > 0) answer = dayCount(daysTo2027) + ' to go.';
+      if (daysTo2027 < 0) answer = dayCount(-daysTo2027) + ' ago.';
+      document.getElementById('new-year-2027-result').textContent = answer;
+
+      clearTimeout(midnightTimer);
+      midnightTimer = setTimeout(updateCountdown, midnight.getTime() - Date.now());
+    }
+
+    updateCountdown();
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) updateCountdown();
+    });
+  </script>
+</body>
+</html>
